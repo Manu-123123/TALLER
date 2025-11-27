@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reloj Virtual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .contenedor {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .titulo {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitulo {
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .reloj-contenedor {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reloj-contenedor::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+
+        #reloj {
+            font-size: 4em;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 5px;
+            position: relative;
+            z-index: 1;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.02);
+            }
+        }
+
+        .reloj-contenedor.alarma-activa {
+            animation: alarmaPulse 0.5s infinite;
+        }
+
+        @keyframes alarmaPulse {
+            0%, 100% {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            50% {
+                background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            }
+        }
+
+        .reloj-contenedor.alarma-activa #reloj {
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+        }
+
+        .seccion {
+            margin-bottom: 25px;
+        }
+
+        .label {
+            display: block;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .label::before {
+            content: '⏰';
+            font-size: 1.2em;
+        }
+
+        #inputAlarma {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        #inputAlarma:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .botones {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #btnAlarma {
+            flex: 1;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #btnAlarma:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        #btnAlarma:active {
+            transform: translateY(0);
+        }
+
+        .btnCancelar {
+            padding: 12px 20px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btnCancelar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btnCancelar:active {
+            transform: translateY(0);
+        }
+
+        #btnAlarma.activo {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+        }
+
+        #btnAlarma.activo:hover {
+            box-shadow: 0 6px 20px rgba(81, 207, 102, 0.4);
+        }
+
+        #statusAlarma {
+            text-align: center;
+            font-size: 0.95em;
+            color: #888;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        #statusAlarma.alerta {
+            background: #ffe0e0;
+            color: #ff6b6b;
+            font-weight: 600;
+            animation: pulse 0.5s infinite;
+        }
+
+        .info {
+            background: linear-gradient(135deg, #f5f7fa 0%, #f0f4f8 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+        }
+
+        .info-texto {
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .info-icono {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 480px) {
+            .contenedor {
+                padding: 25px;
+            }
+
+            .titulo {
+                font-size: 1.8em;
+            }
+
+            #reloj {
+                font-size: 2.5em;
+                letter-spacing: 3px;
+            }
+
+            .reloj-contenedor {
+                padding: 25px;
+            }
+
+            .botones {
+                flex-direction: column;
+            }
+
+            #btnAlarma,
+            .btnCancelar {
+                width: 100%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .reloj-contenedor {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1 class="titulo">⏰ Reloj Virtual</h1>
+        <p class="subtitulo">Con Alarma en Tiempo Real</p>
+
+        <!-- Reloj -->
+        <div class="reloj-contenedor">
+            <div id="reloj">00:00:00</div>
+        </div>
+
+        <!-- Sección de Alarma -->
+        <div class="seccion">
+            <label for="inputAlarma" class="label">Programar Alarma</label>
+            <input 
+                type="time" 
+                id="inputAlarma" 
+                placeholder="Selecciona la hora"
+            >
+            <div class="botones">
+                <button id="btnAlarma" onclick="toggleAlarma()">Programar Alarma</button>
+            </div>
+            <div id="statusAlarma">Sin alarma</div>
+        </div>
+
+        <!-- Información -->
+        <div class="info">
+            <span class="info-icono">ℹ️</span>
+            <div class="info-texto">
+                <strong>Cómo usar:</strong> Selecciona la hora en el campo de entrada y haz clic en "Programar Alarma". El reloj te alertará cuando llegue la hora especificada.
+            </div>
+        </div>
+    </div>
+
+    <script src="dom.js"></script>
+</body>
+</html>
