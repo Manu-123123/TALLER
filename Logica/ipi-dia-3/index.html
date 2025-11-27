@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Segoe UI,Roboto,Arial;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:600px;margin:0 auto}
+        h1{color:white;text-align:center;margin-bottom:30px;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}
+        .search-box{display:flex;gap:10px;margin-bottom:30px}
+        #searchInput{flex:1;padding:12px;border:none;border-radius:8px;font-size:16px}
+        #searchBtn{padding:12px 24px;background:#ff6b6b;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;transition:background 0.3s}
+        #searchBtn:hover{background:#ff5252}
+        #searchBtn:active{transform:scale(0.98)}
+        .card{display:none;background:white;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.3);animation:slideIn 0.3s ease-out}
+        .card.show{display:block}
+        @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .card-header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:20px;text-align:center}
+        .card-img{width:180px;height:180px;object-fit:contain;margin:0 auto;display:block;background:rgba(255,255,255,0.1);border-radius:8px}
+        .card-name{font-size:28px;font-weight:700;color:white;margin-top:15px;text-transform:capitalize}
+        .card-body{padding:20px}
+        .stat-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+        .stat-row:last-child{border-bottom:none}
+        .stat-label{font-weight:600;color:#333}
+        .stat-value{color:#667eea;font-weight:600}
+        .error-msg{color:#ff6b6b;text-align:center;font-weight:600;padding:20px;display:none}
+        .error-msg.show{display:block}
+        .loading{text-align:center;color:white;display:none}
+        .loading.show{display:block}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pokedex</h1>
+        
+        <div class="search-box">
+            <input id="searchInput" type="text" placeholder="Busca un Pokémon..." autocomplete="off">
+            <button id="searchBtn">Buscar</button>
+        </div>
+        
+        <div class="loading" id="loading">Buscando...</div>
+        <div class="error-msg" id="errorMsg"></div>
+        
+        <div class="card" id="card">
+            <div class="card-header">
+                <img class="card-img" id="pokemonImg" alt="Pokémon">
+                <div class="card-name" id="pokemonName"></div>
+            </div>
+            <div class="card-body">
+                <div class="stat-row">
+                    <span class="stat-label">Tipo:</span>
+                    <span class="stat-value" id="pokemonType"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Peso:</span>
+                    <span class="stat-value" id="pokemonWeight"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Altura:</span>
+                    <span class="stat-value" id="pokemonHeight"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Habilidades:</span>
+                    <span class="stat-value" id="pokemonAbilities"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        const $ = id => document.getElementById(id);
+        
+        function mostrarError(msg) {
+            $('errorMsg').textContent = msg;
+            $('errorMsg').classList.add('show');
+            $('card').classList.remove('show');
+            $('loading').classList.remove('show');
+        }
+        
+        function buscarPokemon() {
+            const nombre = $('searchInput').value.trim();
+            if (!nombre) {
+                mostrarError('Por favor ingresa un nombre de Pokémon');
+                return;
+            }
+            
+            $('loading').classList.add('show');
+            $('errorMsg').classList.remove('show');
+            $('card').classList.remove('show');
+            
+            obtenerPokemon(nombre)
+                .then(function(data) {
+                    if (!data) throw new Error('Sin datos');
+                    
+                    $('pokemonImg').src = data.imagen;
+                    $('pokemonImg').alt = data.nombre;
+                    $('pokemonName').textContent = data.nombre;
+                    $('pokemonType').textContent = data.tipo || 'N/A';
+                    $('pokemonWeight').textContent = data.peso || 'N/A';
+                    $('pokemonHeight').textContent = data.altura || 'N/A';
+                    $('pokemonAbilities').textContent = data.habilidades || 'N/A';
+                    
+                    $('loading').classList.remove('show');
+                    $('card').classList.add('show');
+                })
+                .catch(function(error) {
+                    mostrarError('Pokémon no encontrado. Intenta otro nombre.');
+                    console.error(error);
+                });
+        }
+        
+        $('searchBtn').addEventListener('click', buscarPokemon);
+        $('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') buscarPokemon();
+        });
+    </script>
+</body>
+</html>
